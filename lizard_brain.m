@@ -1,4 +1,4 @@
-function [data,v,u,s] = lizard_brain()
+function [data,irx,v,u,s] = lizard_brain()
 
 number_of_branches = 10;
 dimension = 10;
@@ -6,6 +6,7 @@ epsilon = 0.005;
 add_noise = 0.001;
 min_branch_points = 50;
 k_forknngraph = 8;
+irx = [];
 
 make_knn_graph = 0;
 
@@ -20,6 +21,7 @@ branch = make_branch(x0,i1,i2,epsilon);
 end
 
 data = branch;
+irx(1:size(data,1)) = 1;
 
 k = 0;
 while k<=number_of_branches
@@ -39,6 +41,7 @@ n1 = size(data,1);
 n2 = size(newbranch,1);
 if n2>min_branch_points-1
 data(n1+1:n1+n2,:) = newbranch(:,:);
+irx(n1+1:n1+n2) = k+2;
 branch = newbranch;
 k = k+1;
 end
