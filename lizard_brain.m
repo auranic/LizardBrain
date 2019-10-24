@@ -1,9 +1,9 @@
 function [data,irx,v,u,s] = lizard_brain()
-
-number_of_branches = 10;
-dimension = 10;
+rand('twister',10)
+number_of_branches_minus_2 = 8;
+dimension = 5;
 epsilon = 0.005;
-add_noise = 0.001;
+add_noise = 0;
 min_branch_points = 50;
 k_forknngraph = 8;
 irx = [];
@@ -24,7 +24,7 @@ data = branch;
 irx(1:size(data,1)) = 1;
 
 k = 0;
-while k<=number_of_branches
+while k<=number_of_branches_minus_2
 n = floor(size(branch,1)/2);
 %x0 = branch(n,:);
 x0 = data(floor(rand()*size(data,1)),:);

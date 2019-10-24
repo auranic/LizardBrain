@@ -2,16 +2,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 
-def lizard_brain(number_of_branches = 10,
+def lizard_brain(number_of_branches_minus_2 = 10,
                  dimension = 10, 
                  epsilon = 0.005, 
                  add_noise = 0.001, 
                  min_branch_points = 50, 
                  k_forknngraph = 8, 
                  make_knn_graph = False,
-                 show_fig = False
+                 show_fig = False,
+                 verbose = False,
+                 color_branch_split = False
                 ):
-
     x0 = np.zeros((1,dimension)) 
     i1 = 0 
     i2 = 1 
@@ -25,10 +26,11 @@ def lizard_brain(number_of_branches = 10,
     irx = [1]*len(data)
 
     k = 0 
-    while k<=number_of_branches:
+    while k<=number_of_branches_minus_2:
         n = np.floor(len(branch)/2) 
         #x0 = branch(n,:) 
-        x0 = data[[int(np.floor(np.random.random()*len(data)))]]
+        start = int(np.floor(np.random.random()*(len(data)-1)))
+        x0 = data[[start]]
 
         i1 = int(np.floor(np.random.random()*dimension)) 
         i2 = int(np.floor(np.random.random()*dimension)) 
@@ -36,23 +38,36 @@ def lizard_brain(number_of_branches = 10,
         while (i2==i1):
             i2 = int(np.floor(np.random.random()*dimension)) 
         
-        #print('Dim (%i,%i)'%(i1,i2))
+        if verbose:
+            print('Branching in Dim (%i,%i)'%(i1,i2))
 
         newbranch = make_branch(x0,i1,i2,epsilon) 
         n1 = len(data) 
         n2 = len(newbranch) 
-
-        if n2>min_branch_points-1:
-            data = np.concatenate((data,newbranch)) 
-            irx.extend([k+2]*n2)
-            branch = newbranch 
-            k = k+1 
+        
+        if color_branch_split:
+            if n2>min_branch_points-1:
+                data = np.concatenate((data,newbranch)) 
+                irx = list(irx)
+                irx.extend([k+2]*n2)
+                irx = np.array(irx)
+                irx[start:np.max(np.where(irx==irx[start]))+1]=(number_of_branches+3)+k
+                branch = newbranch 
+                k = k+1 
+        else:
+            if n2>min_branch_points-1:
+                data = np.concatenate((data,newbranch)) 
+                irx.extend([k+2]*n2)
+                branch = newbranch 
+                k = k+1 
+            
+        
         # plot(branch(:,1),branch(:,2),'ko')  hold on 
         #  plot([x0(:,1) x0(:,1)+v1(:,1)/20],[x0(:,2) x0(:,2)+v1(:,2)/20],'b-') 
         #  plot([x0(:,1) x0(:,1)+v2(:,1)/20],[x0(:,2) x0(:,2)+v2(:,2)/20],'b-') 
 
     if add_noise>0:
-        data = data + np.random.random((len(data),data.shape[1]))*add_noise 
+        data = data + np.random.random(size=(len(data),data.shape[1]))*add_noise 
 
     pca = PCA()
     u = pca.fit_transform(data)
