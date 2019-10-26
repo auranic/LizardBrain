@@ -51,7 +51,7 @@ def lizard_brain(number_of_branches_minus_2 = 10,
                 irx = list(irx)
                 irx.extend([k+2]*n2)
                 irx = np.array(irx)
-                irx[start:np.max(np.where(irx==irx[start]))+1]=(number_of_branches+3)+k
+                irx[start:np.max(np.where(irx==irx[start]))+1]=(number_of_branches_minus_2+3)+k
                 branch = newbranch 
                 k = k+1 
         else:
