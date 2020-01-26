@@ -11,7 +11,8 @@ def lizard_brain(number_of_branches_minus_2 = 10,
                  make_knn_graph = False,
                  show_fig = False,
                  verbose = False,
-                 color_branch_split = False
+                 color_branch_split = False,
+		 noise_type = 'laplacian'
                 ):
     x0 = np.zeros((1,dimension)) 
     i1 = 0 
@@ -67,7 +68,12 @@ def lizard_brain(number_of_branches_minus_2 = 10,
         #  plot([x0(:,1) x0(:,1)+v2(:,1)/20],[x0(:,2) x0(:,2)+v2(:,2)/20],'b-') 
 
     if add_noise>0:
-        data = data + np.random.random(size=(len(data),data.shape[1]))*add_noise 
+        if noise_type=='uniform':
+            data = data + np.random.random((len(data),data.shape[1]))*add_noise 
+        if noise_type=='gaussian':
+            data = data + np.random.normal(0,1,(len(data),data.shape[1]))*add_noise
+        if noise_type=='laplacian':
+            data = data + np.random.laplace(0,1,(len(data),data.shape[1]))*add_noise
 
     pca = PCA()
     u = pca.fit_transform(data)
