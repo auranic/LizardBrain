@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 
-def lizard_brain(number_of_branches_minus_2 = 10,
+def lizard_brain(number_of_branches = 10,
                  dimension = 10, 
                  epsilon = 0.005, 
                  add_noise = 0.001, 
@@ -10,10 +10,9 @@ def lizard_brain(number_of_branches_minus_2 = 10,
                  k_forknngraph = 8, 
                  make_knn_graph = False,
                  show_fig = False,
-                 verbose = False,
-                 color_branch_split = False,
-		 noise_type = 'laplacian'
+                 noise_type = 'laplacian'
                 ):
+
     x0 = np.zeros((1,dimension)) 
     i1 = 0 
     i2 = 1 
@@ -27,11 +26,10 @@ def lizard_brain(number_of_branches_minus_2 = 10,
     irx = [1]*len(data)
 
     k = 0 
-    while k<=number_of_branches_minus_2:
+    while k<=number_of_branches:
         n = np.floor(len(branch)/2) 
         #x0 = branch(n,:) 
-        start = int(np.floor(np.random.random()*(len(data)-1)))
-        x0 = data[[start]]
+        x0 = data[[int(np.floor(np.random.random()*len(data)))]]
 
         i1 = int(np.floor(np.random.random()*dimension)) 
         i2 = int(np.floor(np.random.random()*dimension)) 
@@ -39,30 +37,17 @@ def lizard_brain(number_of_branches_minus_2 = 10,
         while (i2==i1):
             i2 = int(np.floor(np.random.random()*dimension)) 
         
-        if verbose:
-            print('Branching in Dim (%i,%i)'%(i1,i2))
+        #print('Dim (%i,%i)'%(i1,i2))
 
         newbranch = make_branch(x0,i1,i2,epsilon) 
         n1 = len(data) 
         n2 = len(newbranch) 
-        
-        if color_branch_split:
-            if n2>min_branch_points-1:
-                data = np.concatenate((data,newbranch)) 
-                irx = list(irx)
-                irx.extend([k+2]*n2)
-                irx = np.array(irx)
-                irx[start:np.max(np.where(irx==irx[start]))+1]=(number_of_branches_minus_2+3)+k
-                branch = newbranch 
-                k = k+1 
-        else:
-            if n2>min_branch_points-1:
-                data = np.concatenate((data,newbranch)) 
-                irx.extend([k+2]*n2)
-                branch = newbranch 
-                k = k+1 
-            
-        
+
+        if n2>min_branch_points-1:
+            data = np.concatenate((data,newbranch)) 
+            irx.extend([k+2]*n2)
+            branch = newbranch 
+            k = k+1 
         # plot(branch(:,1),branch(:,2),'ko')  hold on 
         #  plot([x0(:,1) x0(:,1)+v1(:,1)/20],[x0(:,2) x0(:,2)+v1(:,2)/20],'b-') 
         #  plot([x0(:,1) x0(:,1)+v2(:,1)/20],[x0(:,2) x0(:,2)+v2(:,2)/20],'b-') 
@@ -74,16 +59,20 @@ def lizard_brain(number_of_branches_minus_2 = 10,
             data = data + np.random.normal(0,1,(len(data),data.shape[1]))*add_noise
         if noise_type=='laplacian':
             data = data + np.random.laplace(0,1,(len(data),data.shape[1]))*add_noise
+        
 
     pca = PCA()
     u = pca.fit_transform(data)
     v = pca.components_.T
     s = pca.explained_variance_
     if show_fig:
-        plt.plot(u[:,1],u[:,2],'ko')  
-        plt.xlabel('PC1 : '+str(np.around(s[0]/sum(s)*100,2)))
-        plt.ylabel('PC2 : '+str(np.around(s[1]/sum(s)*100,2)))
+        unlab = np.unique(irx)
+        cols = ['k','r','g','b','m','c','y','grey','purple','palegreen']
+        for i,lab in enumerate(unlab):
+            col = cols[i%10]
+            plt.plot(u[irx==lab,0],u[irx==lab,1],'k.',color=col,markersize=1,linewidth=1)
         plt.show()
+
     if make_knn_graph:
 
         knngraph, _ = knnsearch(data,data,k_forknngraph) 
